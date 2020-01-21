@@ -26,39 +26,27 @@ public class PopupDialogAction extends AnAction {
 
     @Override
     public void actionPerformed(@NotNull AnActionEvent event) {
-
         final HibernateAnnotationsTransformer instance = HibernateAnnotationsTransformer.getInstance();
-        Project currentProject = event.getProject();
-        StringBuffer dlgMsg = new StringBuffer(event.getPresentation().getText() + " Selected!");
-        String dlgTitle = event.getPresentation().getDescription();
-        // If an element is selected in the psiFile, add info about it.
         PsiFile psiFile = event.getData(CommonDataKeys.PSI_FILE);
         if (psiFile != null) {
             VirtualFile virtualFile = psiFile.getVirtualFile();
             FileDocumentManager fileDocumentManager = FileDocumentManager.getInstance();
             Document document = fileDocumentManager.getDocument(virtualFile);
-            if (document != null) {
-                fileDocumentManager.saveDocument(document);
-            }
-            try {
-                WriteAction.run(() -> {
-                    String text = new String(virtualFile.contentsToByteArray());
-                    CompilationUnit generate = instance.generate(text);
-                    //dlgMsg.append("Names = " + generate.findAll(ClassOrInterfaceDeclaration.class).stream()
-                    //    .map(NodeWithSimpleName::getNameAsString).collect(Collectors.toList()));
+            if (document != null)
+                try {
+                    WriteAction.run(() -> {
+                        String text = new String(virtualFile.contentsToByteArray());
+                        CompilationUnit generate = instance.generate(text);
+                        PrettyPrinterConfiguration prettyPrinterConfiguration = new PrettyPrinterConfiguration();
+                        prettyPrinterConfiguration.setEndOfLineCharacter("\n");
+                        document.setText(generate.toString(prettyPrinterConfiguration));
 
-                    PrettyPrinterConfiguration prettyPrinterConfiguration = new PrettyPrinterConfiguration();
-                    prettyPrinterConfiguration.setEndOfLineCharacter("\n");
-                    document.setText(generate.toString(prettyPrinterConfiguration));
-
-                });
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-
-            //dlgMsg.append(String.format("\nSelected Element: %s", psiFile.toString()));
+                    });
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
         }
-        // Messages.showMessageDialog(currentProject, dlgMsg.toString(), dlgTitle, Messages.getInformationIcon());
+
 
     }
 

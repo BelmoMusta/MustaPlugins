@@ -9,6 +9,8 @@ import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.expr.MarkerAnnotationExpr;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.function.Predicate;
 
 /**
  * Generates Fields from gettes
@@ -45,7 +47,7 @@ public class LombokTransformer extends Transformer {
         for (MethodDeclaration aMethod : methodDeclarations) {
             if (CodeUtils.isGetter(aMethod) || CodeUtils.isIs(aMethod) || CodeUtils.isGetter(aMethod)) {
                 if (hasAssociatedField(aMethod, fields)) {
-                    aMethod.remove();
+                    removeGetterAndSetter(aMethod, clone);
                     if (!isAddLombok) {
                         isAddLombok = true;
                     }
@@ -58,6 +60,15 @@ public class LombokTransformer extends Transformer {
         }
 
         return clone;
+    }
+
+    private void removeGetterAndSetter(MethodDeclaration aMethod, CompilationUnit clone) {
+        final String nameAsString = aMethod.getNameAsString();
+        Predicate<MethodDeclaration> setterFromGetter = methodDeclaration -> ("set" + nameAsString.substring(3)).equals(methodDeclaration.getNameAsString());
+        Predicate<MethodDeclaration> setterFromIs = methodDeclaration -> ("set" + nameAsString.substring(2)).equals(methodDeclaration.getNameAsString());
+        final Optional<MethodDeclaration> setter = clone.findFirst(MethodDeclaration.class, setterFromGetter.or(setterFromIs));
+        setter.ifPresent(MethodDeclaration::remove);
+        aMethod.remove();
     }
 
     private void addLombokAnnotations(CompilationUnit clone) {

@@ -2,9 +2,11 @@ package musta.belmo.hibernate.annotation.remover;
 
 import com.github.javaparser.JavaParser;
 import com.github.javaparser.ast.CompilationUnit;
+import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.VariableDeclarator;
+import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.github.javaparser.ast.nodeTypes.NodeWithName;
 
 import java.util.Arrays;
@@ -49,22 +51,27 @@ public class HibernateAnnotationsTransformer extends Transformer {
             final MethodDeclaration aMethod = iterator.next();
             if (CodeUtils.isGetter(aMethod) || CodeUtils.isIs(aMethod)) {
                 if (hasHibernateAnnotations(aMethod)) {
-                    MethodDeclaration setterMethod = getSetterMethod(aMethod, methodDeclarations);
                     moveAnnotationsToField(aMethod, fields);
-                    aMethod.remove();
-                    setterMethod.remove();
                 }
             }
         }
-
         return clone;
     }
 
     private void moveAnnotationsToField(MethodDeclaration aMethod, List<FieldDeclaration> fields) {
         final FieldDeclaration fieldDeclaration = getFieldFromMethod(aMethod, fields);
         if (fieldDeclaration != null) {
-            aMethod.getAnnotations().forEach(fieldDeclaration::addAnnotation);
+            NodeList<AnnotationExpr> annotations = aMethod.getAnnotations();
+            Iterator<AnnotationExpr> iterator = annotations.iterator();
+            while (iterator.hasNext()) {
+                AnnotationExpr element = iterator.next();
+                fieldDeclaration.addAnnotation(element);
+                iterator.remove();
+            }
+
+
         }
+
     }
 
     private FieldDeclaration getFieldFromMethod(MethodDeclaration aMethod, List<FieldDeclaration> fields) {
@@ -79,17 +86,7 @@ public class HibernateAnnotationsTransformer extends Transformer {
                 .orElse(null);
     }
 
-    private MethodDeclaration getSetterMethod(MethodDeclaration aMethod, List<MethodDeclaration> methodDeclarations) {
-        return methodDeclarations.stream()
-                .filter(methodDeclaration -> {
-                    final String nameAsString = methodDeclaration.getNameAsString();
-                    final boolean findSetterFromGetter = nameAsString.equals("set" + aMethod.getNameAsString().substring(3));
-                    final boolean findSetterFromIs = nameAsString.equals("set" + aMethod.getNameAsString().substring(2));
-                    return findSetterFromGetter || findSetterFromIs;
-                })
-                .findFirst()
-                .orElse(aMethod);
-    }
+
 
     private boolean hasHibernateAnnotations(MethodDeclaration aMethod) {
         final List<String> hibernateAnnotations = Arrays.asList("Enumerated", "Column", "Id", "OneToOne", "ManyToMany", "OneToMany", "ManyToOne");
