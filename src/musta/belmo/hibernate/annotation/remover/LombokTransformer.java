@@ -2,9 +2,11 @@ package musta.belmo.hibernate.annotation.remover;
 
 import com.github.javaparser.JavaParser;
 import com.github.javaparser.ast.CompilationUnit;
+import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.VariableDeclarator;
+import com.github.javaparser.ast.expr.MarkerAnnotationExpr;
 
 import java.util.List;
 
@@ -61,8 +63,9 @@ public class LombokTransformer extends Transformer {
     private void addLombokAnnotations(CompilationUnit clone) {
         clone.addImport("lombok.Getter");
         clone.addImport("lombok.Setter");
-        clone.addAnnotationDeclaration("Getter");
-        clone.addAnnotationDeclaration("Setter");
+        ClassOrInterfaceDeclaration cls = clone.findAll(ClassOrInterfaceDeclaration.class).get(0);
+        cls.addAnnotation(new MarkerAnnotationExpr("Getter"));
+        cls.addAnnotation(new MarkerAnnotationExpr("Setter"));
     }
 
     private boolean hasAssociatedField(MethodDeclaration aMethod, List<FieldDeclaration> fields) {
