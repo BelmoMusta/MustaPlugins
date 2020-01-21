@@ -1,4 +1,4 @@
-package musta.belmo.hibernate.annotation.remover;
+package musta.belmo.plugins.ast;
 
 import com.github.javaparser.JavaParser;
 import com.github.javaparser.ast.CompilationUnit;
@@ -22,12 +22,12 @@ import java.util.stream.Collectors;
  * @version 0.0.0
  * @since 0.0.0.SNAPSHOT
  */
-public class HibernateAnnotationsTransformer extends Transformer {
-    private static HibernateAnnotationsTransformer INSTANCE;
+public class JPAAnnotationsTransformer extends Transformer {
+    private static JPAAnnotationsTransformer INSTANCE;
 
-    public static HibernateAnnotationsTransformer getInstance() {
+    public static JPAAnnotationsTransformer getInstance() {
         if (INSTANCE == null) {
-            INSTANCE = new HibernateAnnotationsTransformer();
+            INSTANCE = new JPAAnnotationsTransformer();
         }
         return INSTANCE;
     }

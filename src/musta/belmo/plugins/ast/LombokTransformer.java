@@ -1,4 +1,4 @@
-package musta.belmo.hibernate.annotation.remover;
+package musta.belmo.plugins.ast;
 
 import com.github.javaparser.JavaParser;
 import com.github.javaparser.ast.CompilationUnit;

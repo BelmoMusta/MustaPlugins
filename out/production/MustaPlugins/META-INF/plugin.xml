@@ -1,12 +1,14 @@
 <idea-plugin>
-    <id>com.your.company.unique.plugin.id</id>
+    <id>musta.belmo.plugins</id>
     <name>MustaPlugin</name>
     <version>1.0</version>
-    <vendor email="support@yourcompany.com" url="http://www.yourcompany.com">MustaBelmo</vendor>
+    <vendor email="belmokhtar.91@gmail.com" url="https://github.com/BelmoMusta">MustaBelmo</vendor>
 
     <description><![CDATA[
-  This plugin removes the annotationss over the methods and moves them back to the fields.
-  this is generally useful when using lombok as setters and getters generator.
+  This plugin removes the annotations over the methods and moves them back to the fields.
+  It also allows the use of lombok annotations to get rid of getters and setters
+
+                    Developed with ♥ by mustabelmo
 ]]></description>
 
     <change-notes><![CDATA[
@@ -29,16 +31,18 @@
 
     <actions>
         <!-- Add your actions here -->
-        <action id="musta.belmo.hibernate.annotation.remover.LombokifyAction"
-                class="musta.belmo.hibernate.annotation.remover.LombokifyAction" text="Lombokify"
-                description="Turn into lombok class">
-            <add-to-group group-id="ToolsMenu" anchor="after" relative-to-action="musta.belmo.hibernate.annotation.remover.PopupDialogAction"/>
-        </action>
-
-        <action id="musta.belmo.hibernate.annotation.remover.PopupDialogAction"
-                class="musta.belmo.hibernate.annotation.remover.PopupDialogAction" text="Move JPA annotations to fields"
+        <action id="musta.belmo.plugins.action.JPAAnnotationRemoverAction"
+                class="musta.belmo.plugins.action.JPAAnnotationRemoverAction" text="Move JPA annotations to fields"
                 description="description">
             <add-to-group group-id="ToolsMenu" anchor="first" />
+            <add-to-group group-id="EditorActions" anchor="first" />
+        </action>
+
+        <action id="musta.belmo.plugins.action.LombokifyAction"
+                class="musta.belmo.plugins.action.LombokifyAction" text="Lombokify"
+                description="Turn into lombok class">
+            <add-to-group group-id="ToolsMenu"  anchor="after" relative-to-action="musta.belmo.plugins.action.JPAAnnotationRemoverAction"/>
+            <add-to-group group-id="EditorActions"  anchor="after" relative-to-action="musta.belmo.plugins.action.JPAAnnotationRemoverAction"/>
         </action>
     </actions>
 
