@@ -47,6 +47,11 @@
                     description="Turn into lombok class">
             </action>
 
+            <action id="musta.belmo.plugins.action.OnDemandeHolderAction"
+                    class="musta.belmo.plugins.action.OnDemandeHolderAction" text="On demand holder"
+                    description="Generates the holder pattern">
+            </action>
+
         </group>
     </actions>
 

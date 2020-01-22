@@ -1,6 +1,5 @@
 package musta.belmo.plugins.ast;
 
-import com.github.javaparser.JavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.FieldDeclaration;
@@ -37,10 +36,6 @@ public class JPAAnnotationsTransformer extends Transformer {
      * @return CompilationUnit
      */
     @Override
-    public CompilationUnit generate(String compilationUnitSrc) {
-        return generate(JavaParser.parse(compilationUnitSrc));
-    }
-
     public CompilationUnit generate(CompilationUnit compilationUnitSrc) {
         CompilationUnit clone = compilationUnitSrc.clone();
         List<MethodDeclaration> methodDeclarations = clone.findAll(MethodDeclaration.class);

@@ -1,6 +1,5 @@
 package musta.belmo.plugins.ast;
 
-import com.github.javaparser.JavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
@@ -34,10 +33,6 @@ public class LombokTransformer extends Transformer {
      * @return CompilationUnit
      */
     @Override
-    public CompilationUnit generate(String compilationUnitSrc) {
-        return generate(JavaParser.parse(compilationUnitSrc));
-    }
-
     public CompilationUnit generate(CompilationUnit compilationUnitSrc) {
         boolean isAddLombok = false;
         CompilationUnit clone = compilationUnitSrc.clone();

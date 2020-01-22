@@ -3,10 +3,10 @@ package musta.belmo.plugins.action;
 import musta.belmo.plugins.ast.TransformerType;
 
 
-public class JPAAnnotationRemoverAction extends AbstractAction {
+public class OnDemandeHolderAction extends AbstractAction {
 
     @Override
     public TransformerType getType() {
-        return TransformerType.JPA;
+        return TransformerType.ON_DEMAND_HOLDER;
     }
 }
