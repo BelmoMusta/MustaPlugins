@@ -30,20 +30,24 @@
     </extensions>
 
     <actions>
-        <!-- Add your actions here -->
-        <action id="musta.belmo.plugins.action.JPAAnnotationRemoverAction"
-                class="musta.belmo.plugins.action.JPAAnnotationRemoverAction" text="Move JPA annotations to fields"
-                description="description">
-            <add-to-group group-id="ToolsMenu" anchor="first" />
-            <add-to-group group-id="EditorActions" anchor="first" />
-        </action>
+        <group id="musta.belmo.plugins.action.CustomDefaultActionGroup"
+               class="musta.belmo.plugins.action.CustomDefaultActionGroup"
+               text="MustaActions" description="Musta Actions">
 
-        <action id="musta.belmo.plugins.action.LombokifyAction"
-                class="musta.belmo.plugins.action.LombokifyAction" text="Lombokify"
-                description="Turn into lombok class">
-            <add-to-group group-id="ToolsMenu"  anchor="after" relative-to-action="musta.belmo.plugins.action.JPAAnnotationRemoverAction"/>
-            <add-to-group group-id="EditorActions"  anchor="after" relative-to-action="musta.belmo.plugins.action.JPAAnnotationRemoverAction"/>
-        </action>
+            <add-to-group group-id="EditorPopupMenu" anchor="first"/>
+            <add-to-group group-id="ToolsMenu" anchor="first"/>
+            <!-- Add your actions here -->
+            <action id="musta.belmo.plugins.action.JPAAnnotationRemoverAction"
+                    class="musta.belmo.plugins.action.JPAAnnotationRemoverAction" text="Move JPA annotations to fields"
+                    description="description">
+            </action>
+
+            <action id="musta.belmo.plugins.action.LombokifyAction"
+                    class="musta.belmo.plugins.action.LombokifyAction" text="Lombokify"
+                    description="Turn into lombok class">
+            </action>
+
+        </group>
     </actions>
 
 </idea-plugin>
