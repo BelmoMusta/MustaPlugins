@@ -28,6 +28,11 @@ public class SingletonFactory {
             case ON_DEMAND_HOLDER:
                 transformer = new GenerateOnDemandHolderPattern();
                 break;
+            case FIELDS_FROM_GETTERS:
+                transformer = new FieldsFromGetters();
+                break;
+            case CLASS_BUILDER:
+                transformer = new ClassBuilder();
         }
         return transformer;
     }

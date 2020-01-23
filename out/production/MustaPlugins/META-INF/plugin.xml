@@ -52,6 +52,16 @@
                     description="Generates the holder pattern">
             </action>
 
+            <action id="musta.belmo.plugins.action.FieldsFromGettersAction"
+                    class="musta.belmo.plugins.action.FieldsFromGettersAction" text="Fields from getters"
+                    description="Generates fields from getters">
+            </action>
+
+            <action id="musta.belmo.plugins.action.ClassBuilderAction"
+                    class="musta.belmo.plugins.action.ClassBuilderAction" text="ClassBuilderAction"
+                    description="ClassBuilderAction">
+            </action>
+
         </group>
     </actions>
 
