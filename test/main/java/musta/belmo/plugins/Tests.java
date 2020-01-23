@@ -3,13 +3,17 @@ package musta.belmo.plugins;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import musta.belmo.plugins.ast.JPAAnnotationsTransformer;
-import musta.belmo.plugins.ast.LombokTransformer;
+import musta.belmo.plugins.ast.SingletonFactory;
+import musta.belmo.plugins.ast.Transformer;
+import musta.belmo.plugins.ast.TransformerType;
 import org.apache.commons.io.FileUtils;
 import org.junit.Assert;
 import org.junit.Test;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.List;
 
@@ -17,11 +21,9 @@ import java.util.List;
 public class Tests {
     @Test
     public void testLombok() throws Exception {
-        final LombokTransformer instance = LombokTransformer.getInstance();
-        final URL url = getClass().getClassLoader().getResource("Bean.java");
-        final URI u = new URI(url.getFile().trim().replaceAll("\\u0020", "%20"));
-        final String content = FileUtils.readFileToString(new File(u.getPath()), "UTF-8");
-        final CompilationUnit compilationUnit = instance.generate(content);
+        final Transformer lombokTransformer = SingletonFactory.getTransformer(TransformerType.LOMBOK);
+        final String content = getContentFromFile("Bean.java");
+        final CompilationUnit compilationUnit = lombokTransformer.generate(content);
         final List<MethodDeclaration> gettersAndSetters = compilationUnit.findAll(MethodDeclaration.class,
                 aMethod -> aMethod.getNameAsString().matches("[sg]et[A-Z$_]([A-Za-z0-9_$])*"));
         Assert.assertTrue(gettersAndSetters.isEmpty());
@@ -29,13 +31,26 @@ public class Tests {
 
     @Test
     public void testJPAAnnotations() throws Exception {
-        JPAAnnotationsTransformer instance = JPAAnnotationsTransformer.getInstance();
-        URL url = getClass().getClassLoader().getResource("BeanWithJPAAnnotations.java");
-        URI u = new URI(url.getFile().trim().replaceAll("\\u0020", "%20"));
-        String content = FileUtils.readFileToString(new File(u.getPath()), "UTF-8");
-        CompilationUnit compilationUnit = instance.generate(content);
+        final Transformer jpaTransformer = SingletonFactory.getTransformer(TransformerType.JPA);
+        final String content = getContentFromFile("BeanWithJPAAnnotations.java");
+        final CompilationUnit compilationUnit = jpaTransformer.generate(content);
         System.out.println(compilationUnit);
 
 
+    }
+    @Test
+    public void testBuilder() throws Exception {
+        final Transformer jpaTransformer = SingletonFactory.getTransformer(TransformerType.CLASS_BUILDER);
+        final String content = getContentFromFile("ASimpleClass.java");
+        final CompilationUnit compilationUnit = jpaTransformer.generate(content);
+        System.out.println(compilationUnit);
+
+
+    }
+
+    private String getContentFromFile(String fileName) throws URISyntaxException, IOException {
+        final URL url = getClass().getClassLoader().getResource(fileName);
+        final URI u = new URI(url.getFile().trim().replaceAll("\\u0020", "%20"));
+        return FileUtils.readFileToString(new File(u.getPath()), "UTF-8");
     }
 }

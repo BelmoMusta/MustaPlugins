@@ -1,6 +1,5 @@
 package musta.belmo.plugins.ast;
 
-import com.github.javaparser.JavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Modifier;
 import com.github.javaparser.ast.NodeList;
@@ -17,8 +16,6 @@ import com.github.javaparser.ast.expr.ThisExpr;
 import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.ast.stmt.ReturnStmt;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.EnumSet;
 import java.util.stream.Stream;
 
@@ -29,44 +26,33 @@ public class ClassBuilder extends Transformer {
 
     @Override
     public CompilationUnit generate(CompilationUnit code) {
-        return buildFromClass(code);
+        return buildFromClass(code, "Builder");
     }
 
-
-    public CompilationUnit buildFormFile(File f) throws IOException {
-        return buildFromClass(JavaParser.parse(f));
+    public CompilationUnit generate(CompilationUnit code, String destClassName) {
+        return buildFromClass(code, destClassName);
     }
 
-    public CompilationUnit buildFormFile(String code) {
-        return buildFromClass(JavaParser.parse(code));
-    }
+    private CompilationUnit buildFromClass(CompilationUnit compilationUnit, String destClassName) {
+        final CompilationUnit resultUnit = compilationUnit.clone();
 
-    private CompilationUnit buildFromClass(CompilationUnit compilationUnit) {
-        final CompilationUnit resultUnit = new CompilationUnit();
-
-        setupPackageandImports(compilationUnit, resultUnit);
-        compilationUnit.findAll(ClassOrInterfaceDeclaration.class)
+        resultUnit.findAll(ClassOrInterfaceDeclaration.class)
                 .stream()
                 .filter(srcClass ->
                         !srcClass.isAbstract()
                                 && !srcClass.isInterface()
                                 && !srcClass.isInnerClass()).
                 forEach(classDef -> {
-                    final ClassOrInterfaceDeclaration destClass = resultUnit.addClass(String.format("%sBuilder", classDef.getNameAsString()));
-                    VariableDeclarator variableDeclarator = createConstructor(classDef, destClass);
-                    createMethods(classDef, destClass, variableDeclarator);
-                    createBuildMethod(classDef, destClass, variableDeclarator);
+                    ClassOrInterfaceDeclaration builderInnerClass = new ClassOrInterfaceDeclaration();
+                    builderInnerClass.setName(String.format("%s" + destClassName, classDef.getNameAsString()));
+                    builderInnerClass.addModifier(Modifier.PUBLIC, Modifier.STATIC);
+                    classDef.addMember(builderInnerClass);
+                    VariableDeclarator variableDeclarator = createConstructor(classDef, builderInnerClass);
+                    createMethods(classDef, builderInnerClass, variableDeclarator);
+                    createBuildMethod(classDef, builderInnerClass, variableDeclarator);
                 });
         return resultUnit;
     }
-
-    private void setupPackageandImports(CompilationUnit compilationUnit, CompilationUnit resultUnit) {
-        resultUnit.setPackageDeclaration(compilationUnit.getPackageDeclaration()
-                .map(pkg -> pkg.clone().setName(pkg.getNameAsString() + ".builder"))
-                .orElse(null));
-        resultUnit.getImports().addAll(compilationUnit.getImports());
-    }
-
 
     private void createBuildMethod(ClassOrInterfaceDeclaration classDef, ClassOrInterfaceDeclaration classDeclaration, VariableDeclarator variableDeclarator) {
         MethodDeclaration buildMethod = classDeclaration.addMethod("build");
@@ -81,7 +67,7 @@ public class ClassBuilder extends Transformer {
         Stream<MethodDeclaration> methodDeclarationStream = classDef.findAll(MethodDeclaration.class).stream().filter(methodDeclaration ->
                 !methodDeclaration.isAnnotationPresent("Override"))
                 .filter(methodDeclaration ->
-                        !methodDeclaration.getName().asString().startsWith("get")
+                        !methodDeclaration.getName().asString().matches("(get|is).+")
                                 && !"clone".equals(methodDeclaration.getName().asString()));
 
         methodDeclarationStream.forEach(methodDeclaration -> {
