@@ -9,7 +9,11 @@ import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.TextRange;
+import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.psi.PsiFile;
 import org.jetbrains.annotations.NotNull;
+
+import java.io.IOException;
 
 public class UnicodifyAction extends AnAction {
 
@@ -21,22 +25,38 @@ public class UnicodifyAction extends AnAction {
 
     @Override
     public void actionPerformed(@NotNull AnActionEvent e) {
-
-        // Get all the required data from data keys
         final Editor editor = e.getRequiredData(CommonDataKeys.EDITOR);
         final Project project = e.getRequiredData(CommonDataKeys.PROJECT);
         final Document document = editor.getDocument();
         Caret primaryCaret = editor.getCaretModel().getPrimaryCaret();
-        int start = primaryCaret.getSelectionStart();
-        int end = primaryCaret.getSelectionEnd();
+        final String[] text = new String[1];
+        int[] start = {0};
+        int[] end = {0};
+        PsiFile psiFile = e.getData(CommonDataKeys.PSI_FILE);
+        if (psiFile != null) {
+            if (!primaryCaret.isValid()) {
+                final VirtualFile virtualFile = psiFile.getVirtualFile();
+                try {
+                    text[0] = new String(virtualFile.contentsToByteArray());
+                    end[0] = text[0].length();
+                } catch (IOException ex) {
+                    throw new RuntimeException(ex);
+                }
+            } else {
+                start[0] = primaryCaret.getSelectionStart();
+                end[0] = primaryCaret.getSelectionEnd();
+                text[0] = document.getText(new TextRange(start[0], end[0]));
+            }
+
+        }
+
         WriteCommandAction.runWriteCommandAction(project, () -> {
-                    String text = document.getText(new TextRange(start, end));
-                    document.replaceString(start, end, unicodify(text));
+                    document.replaceString(start[0], end[0], unicodify(text[0]));
                 }
         );
         // De-select the text range that was just replaced
 
-        //יייייייייייייייייייייייייי
+
         primaryCaret.removeSelection();
     }
 
@@ -45,7 +65,7 @@ public class UnicodifyAction extends AnAction {
         for (int i = 0; i < string.length(); i++) {
             char ch = string.charAt(i);
             if (ch >= 127) {
-                String hexDigits = Integer.toHexString(ch);//.toUpperCase();
+                String hexDigits = Integer.toHexString(ch);
                 String escapedCh = "\\u" + "0000".substring(hexDigits.length()) + hexDigits;
                 stringBuilder.append(escapedCh);
             } else {

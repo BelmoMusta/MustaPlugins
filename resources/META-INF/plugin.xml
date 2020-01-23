@@ -63,8 +63,8 @@
             </action>
 
             <action id="musta.belmo.plugins.action.UnicodifyAction"
-                    class="musta.belmo.plugins.action.UnicodifyAction" text="UnicodifyAction"
-                    description="UnicodifyAction">
+                    class="musta.belmo.plugins.action.UnicodifyAction" text="Unicodify"
+                    description="Turn non unicode characters into unicode identifier">
             </action>
 
         </group>
