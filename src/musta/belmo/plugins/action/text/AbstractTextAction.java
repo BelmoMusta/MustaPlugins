@@ -1,4 +1,4 @@
-package musta.belmo.plugins.action;
+package musta.belmo.plugins.action.text;
 
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
@@ -15,7 +15,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 
-public class UnicodifyAction extends AnAction {
+public abstract class AbstractTextAction extends AnAction {
 
     @Override
     public void update(AnActionEvent e) {
@@ -51,7 +51,7 @@ public class UnicodifyAction extends AnAction {
         }
 
         WriteCommandAction.runWriteCommandAction(project, () -> {
-                    document.replaceString(start[0], end[0], unicodify(text[0]));
+                    document.replaceString(start[0], end[0], changeText(text[0]));
                 }
         );
         // De-select the text range that was just replaced
@@ -60,18 +60,8 @@ public class UnicodifyAction extends AnAction {
         primaryCaret.removeSelection();
     }
 
-    public static String unicodify(String string) {
-        StringBuilder stringBuilder = new StringBuilder();
-        for (int i = 0; i < string.length(); i++) {
-            char ch = string.charAt(i);
-            if (ch >= 127) {
-                String hexDigits = Integer.toHexString(ch);
-                String escapedCh = "\\u" + "0000".substring(hexDigits.length()) + hexDigits;
-                stringBuilder.append(escapedCh);
-            } else {
-                stringBuilder.append(ch);
-            }
-        }
-        return stringBuilder.toString();
-    }
+
+    public abstract String changeText(String string);
+
+
 }

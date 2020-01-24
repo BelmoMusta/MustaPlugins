@@ -62,9 +62,19 @@
                     description="ClassBuilderAction">
             </action>
 
-            <action id="musta.belmo.plugins.action.UnicodifyAction"
-                    class="musta.belmo.plugins.action.UnicodifyAction" text="Unicodify"
+            <action id="musta.belmo.plugins.action.text.UnicodifyAction"
+                    class="musta.belmo.plugins.action.text.UnicodifyAction" text="Unicodify"
                     description="Turn non unicode characters into unicode identifier">
+            </action>
+
+            <action id="musta.belmo.plugins.action.text.DecodeBase64Action"
+                    class="musta.belmo.plugins.action.text.DecodeBase64Action" text="Decode 64 "
+                    description="Decode a 64 based text">
+            </action>
+
+            <action id="musta.belmo.plugins.action.text.EncodeBase64Action"
+                    class="musta.belmo.plugins.action.text.EncodeBase64Action" text="Encode 64 "
+                    description="Encode a 64 based text">
             </action>
 
         </group>
