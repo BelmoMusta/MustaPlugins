@@ -67,6 +67,11 @@
                     description="Turn non unicode characters into unicode identifier">
             </action>
 
+            <action id="musta.belmo.plugins.action.text.UnUnicodifyAction"
+                    class="musta.belmo.plugins.action.text.UnUnicodifyAction" text="UnUnicodify"
+                    description="Turn unicode identifiers into ISO-8859-1 characters">
+            </action>
+
             <action id="musta.belmo.plugins.action.text.DecodeBase64Action"
                     class="musta.belmo.plugins.action.text.DecodeBase64Action" text="Decode 64 "
                     description="Decode a 64 based text">
