@@ -74,8 +74,8 @@ public class TextUtils {
     }
 
     public static String camelCase(String input) {
-        return Arrays.stream(input.split("\\s+")).reduce((a, b) ->
-                StringUtils.capitalize(a) + StringUtils.capitalize(b)).get();
+        return Arrays.stream(input.split("[ \t]+|_")).reduce((a, b) ->
+                a + StringUtils.capitalize(b)).get();
     }
 
     public static String reduceWhiteSpaces(String input) {
