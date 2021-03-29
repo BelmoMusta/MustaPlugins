@@ -1,12 +1,12 @@
 package musta.belmo.plugins.action;
 
-import musta.belmo.plugins.ast.TransformerType;
-
+import musta.belmo.plugins.ast.JPAAnnotationsTransformer;
+import musta.belmo.plugins.ast.Transformer;
 
 public class JPAAnnotationRemoverAction extends AbstractAction {
-
+    
     @Override
-    public TransformerType getType() {
-        return TransformerType.JPA;
+    protected Transformer getTransformer() {
+        return new JPAAnnotationsTransformer();
     }
 }

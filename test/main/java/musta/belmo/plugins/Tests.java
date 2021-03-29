@@ -2,10 +2,10 @@ package musta.belmo.plugins;
 
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.MethodDeclaration;
+import musta.belmo.plugins.ast.ClassBuilder;
 import musta.belmo.plugins.ast.JPAAnnotationsTransformer;
-import musta.belmo.plugins.ast.SingletonFactory;
+import musta.belmo.plugins.ast.LombokTransformer;
 import musta.belmo.plugins.ast.Transformer;
-import musta.belmo.plugins.ast.TransformerType;
 import org.apache.commons.io.FileUtils;
 import org.junit.Assert;
 import org.junit.Test;
@@ -21,7 +21,7 @@ import java.util.List;
 public class Tests {
     @Test
     public void testLombok() throws Exception {
-        final Transformer lombokTransformer = SingletonFactory.getTransformer(TransformerType.LOMBOK);
+        final Transformer lombokTransformer = new LombokTransformer();
         final String content = getContentFromFile("Bean.java");
         final CompilationUnit compilationUnit = lombokTransformer.generate(content);
         final List<MethodDeclaration> gettersAndSetters = compilationUnit.findAll(MethodDeclaration.class,
@@ -31,7 +31,7 @@ public class Tests {
 
     @Test
     public void testJPAAnnotations() throws Exception {
-        final Transformer jpaTransformer = SingletonFactory.getTransformer(TransformerType.JPA);
+        final Transformer jpaTransformer = new JPAAnnotationsTransformer();
         final String content = getContentFromFile("BeanWithJPAAnnotations.java");
         final CompilationUnit compilationUnit = jpaTransformer.generate(content);
         System.out.println(compilationUnit);
@@ -40,7 +40,7 @@ public class Tests {
     }
     @Test
     public void testBuilder() throws Exception {
-        final Transformer jpaTransformer = SingletonFactory.getTransformer(TransformerType.CLASS_BUILDER);
+        final Transformer jpaTransformer = new ClassBuilder();
         final String content = getContentFromFile("ASimpleClass.java");
         final CompilationUnit compilationUnit = jpaTransformer.generate(content);
         System.out.println(compilationUnit);

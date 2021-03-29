@@ -1,12 +1,12 @@
 package musta.belmo.plugins.action;
 
-import musta.belmo.plugins.ast.TransformerType;
+import musta.belmo.plugins.ast.GenerateOnDemandHolderPattern;
+import musta.belmo.plugins.ast.Transformer;
 
 
 public class OnDemandeHolderAction extends AbstractAction {
-
     @Override
-    public TransformerType getType() {
-        return TransformerType.ON_DEMAND_HOLDER;
+    protected Transformer getTransformer() {
+        return new GenerateOnDemandHolderPattern();
     }
 }

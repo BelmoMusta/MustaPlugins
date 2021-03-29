@@ -14,9 +14,7 @@ import com.intellij.openapi.fileEditor.FileDocumentManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiFile;
-import musta.belmo.plugins.ast.SingletonFactory;
 import musta.belmo.plugins.ast.Transformer;
-import musta.belmo.plugins.ast.TransformerType;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
@@ -33,7 +31,7 @@ public abstract class AbstractAction extends AnAction {
     public void actionPerformed(@NotNull AnActionEvent event) {
 
         PsiFile psiFile = event.getData(CommonDataKeys.PSI_FILE);
-
+        
         if (psiFile != null && psiFile.getName().endsWith(".java")) {
             VirtualFile virtualFile = psiFile.getVirtualFile();
             FileDocumentManager fileDocumentManager = FileDocumentManager.getInstance();
@@ -47,6 +45,7 @@ public abstract class AbstractAction extends AnAction {
                         PrettyPrinterConfiguration prettyPrinterConfiguration = new PrettyPrinterConfiguration();
                         prettyPrinterConfiguration.setEndOfLineCharacter("\n");
                         document.setText(generate.toString(prettyPrinterConfiguration));
+                        fileDocumentManager.saveDocument(document);
                     };
                     ApplicationManager.getApplication().runWriteAction(getRunnableWrapper(runnable, event.getProject()));
 
@@ -60,10 +59,6 @@ public abstract class AbstractAction extends AnAction {
     private Runnable getRunnableWrapper(final Runnable runnable, Project project) {
         return () -> CommandProcessor.getInstance().executeCommand(project, runnable, "cut", ActionGroup.EMPTY_GROUP);
     }
-
-    public abstract TransformerType getType();
-
-    private Transformer getTransformer() {
-        return SingletonFactory.getTransformer(getType());
-    }
+    
+    protected abstract Transformer getTransformer();
 }

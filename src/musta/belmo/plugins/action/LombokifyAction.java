@@ -1,12 +1,11 @@
 package musta.belmo.plugins.action;
 
-import musta.belmo.plugins.ast.TransformerType;
-
+import musta.belmo.plugins.ast.LombokTransformer;
+import musta.belmo.plugins.ast.Transformer;
 
 public class LombokifyAction extends AbstractAction {
-
     @Override
-    public TransformerType getType() {
-        return TransformerType.LOMBOK;
+    protected Transformer getTransformer() {
+        return new LombokTransformer();
     }
 }

@@ -1,12 +1,11 @@
 package musta.belmo.plugins.action;
 
-import musta.belmo.plugins.ast.ClassBuilder;
+import musta.belmo.plugins.ast.RestWSCreator;
 import musta.belmo.plugins.ast.Transformer;
 
-public class ClassBuilderAction extends AbstractAction {
-    
+public class RestWsCreatorAction extends AbstractAction {
     @Override
     protected Transformer getTransformer() {
-        return new ClassBuilder();
+        return new RestWSCreator();
     }
 }
