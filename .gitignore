@@ -4,4 +4,5 @@ frames
 target 
 output
 logs.txt
+out/
 /logs/*
