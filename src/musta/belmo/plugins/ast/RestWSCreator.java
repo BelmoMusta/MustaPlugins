@@ -5,11 +5,13 @@ import com.github.javaparser.ast.Modifier;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.Parameter;
-import com.github.javaparser.ast.comments.LineComment;
+import com.github.javaparser.ast.comments.BlockComment;
 import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.github.javaparser.ast.expr.MarkerAnnotationExpr;
 import com.github.javaparser.ast.expr.NormalAnnotationExpr;
+import com.github.javaparser.ast.expr.NullLiteralExpr;
 import com.github.javaparser.ast.stmt.BlockStmt;
+import com.github.javaparser.ast.stmt.ReturnStmt;
 import com.github.javaparser.ast.type.TypeParameter;
 import musta.belmo.plugins.action.WsParam;
 import musta.belmo.plugins.action.WsSignature;
@@ -49,7 +51,10 @@ public class RestWSCreator extends Transformer {
 					restMethod.setType(type);
 					restMethod.addParameter(parameter);
 				}
-				body.addOrphanComment(new LineComment("TODO complete this method"));
+				ReturnStmt returnStmt = new ReturnStmt();
+				returnStmt.setExpression(new NullLiteralExpr());
+				returnStmt.setComment(new BlockComment("TODO complete this method"));
+				body.addStatement(returnStmt);
 				restMethod.setBody(body);
 			}
 		}
@@ -59,8 +64,8 @@ public class RestWSCreator extends Transformer {
 	
 	public static void main(String[] args) {
 		String signatureAsString = "GET /interne/instance/{idInstance}";
-		WsSignature.createWsSignature(signatureAsString);
-	}
+        System.out.println(WsSignature.createWsSignature(signatureAsString));
+    }
 	
 	
 }

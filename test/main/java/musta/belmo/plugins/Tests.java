@@ -2,6 +2,7 @@ package musta.belmo.plugins;
 
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.MethodDeclaration;
+import musta.belmo.plugins.action.text.ToOptionalAction;
 import musta.belmo.plugins.ast.ClassBuilder;
 import musta.belmo.plugins.ast.JPAAnnotationsTransformer;
 import musta.belmo.plugins.ast.LombokTransformer;
@@ -38,6 +39,7 @@ public class Tests {
 
 
     }
+
     @Test
     public void testBuilder() throws Exception {
         final Transformer jpaTransformer = new ClassBuilder();
@@ -46,6 +48,23 @@ public class Tests {
         System.out.println(compilationUnit);
 
 
+    }
+
+    @Test
+    public void optaionalWrapper() throws Exception {
+        ToOptionalAction toOptionalAction = new ToOptionalAction();
+        String falseOption = toOptionalAction.changeText("false");
+        String strOptions = toOptionalAction.changeText("0");
+        String chained = toOptionalAction.changeText("a.b().c().d().e()");
+
+        Assert.assertEquals("Optional.of(false);",falseOption);
+        Assert.assertEquals("Optional.of(0);",strOptions);
+        Assert.assertEquals("Optional.of(0);",strOptions);
+        Assert.assertEquals("Optional.ofNullable(a)\n" +
+                "     .map(mapped -> mapped.b())\n" +
+                "     .map(mapped -> mapped.c())\n" +
+                "     .map(mapped -> mapped.d())\n" +
+                "     .map(mapped -> mapped.e());",chained);
     }
 
     private String getContentFromFile(String fileName) throws URISyntaxException, IOException {

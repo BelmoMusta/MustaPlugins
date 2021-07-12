@@ -7,7 +7,6 @@ import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.CommonDataKeys;
 import com.intellij.openapi.application.ApplicationManager;
-import com.intellij.openapi.application.WriteAction;
 import com.intellij.openapi.command.CommandProcessor;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.fileEditor.FileDocumentManager;
@@ -29,20 +28,21 @@ public abstract class AbstractAction extends AnAction {
 
     @Override
     public void actionPerformed(@NotNull AnActionEvent event) {
-
         PsiFile psiFile = event.getData(CommonDataKeys.PSI_FILE);
-        
         if (psiFile != null && psiFile.getName().endsWith(".java")) {
             VirtualFile virtualFile = psiFile.getVirtualFile();
             FileDocumentManager fileDocumentManager = FileDocumentManager.getInstance();
             Document document = fileDocumentManager.getDocument(virtualFile);
             if (document != null) {
+                fileDocumentManager.saveDocument(document); // get the last state of a document
                 try {
                     final String text = new String(virtualFile.contentsToByteArray());
                     final CompilationUnit generate = getTransformer().generate(text);
 
                     final Runnable runnable = () -> {
                         PrettyPrinterConfiguration prettyPrinterConfiguration = new PrettyPrinterConfiguration();
+						prettyPrinterConfiguration.setColumnAlignFirstMethodChain(true);
+						prettyPrinterConfiguration.setColumnAlignParameters(true);
                         prettyPrinterConfiguration.setEndOfLineCharacter("\n");
                         document.setText(generate.toString(prettyPrinterConfiguration));
                         fileDocumentManager.saveDocument(document);

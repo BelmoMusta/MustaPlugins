@@ -47,9 +47,9 @@
                     description="Turn into lombok class">
             </action>
 
-            <action id="musta.belmo.plugins.action.OnDemandeHolderAction"
-                    class="musta.belmo.plugins.action.OnDemandeHolderAction" text="On demand holder"
-                    description="Generates the holder pattern">
+            <action id="musta.belmo.plugins.action.text.ToOptionalAction"
+                    class="musta.belmo.plugins.action.text.ToOptionalAction" text="Wrap with Optional"
+                    description="Wraps a statement with Optional">
             </action>
 
             <action id="musta.belmo.plugins.action.FieldsFromGettersAction"
