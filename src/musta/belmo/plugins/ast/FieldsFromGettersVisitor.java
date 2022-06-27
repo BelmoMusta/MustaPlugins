@@ -7,10 +7,9 @@ import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.expr.AssignExpr;
 import com.github.javaparser.ast.expr.Expression;
-import com.github.javaparser.ast.expr.ObjectCreationExpr;
 import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.ast.stmt.ReturnStmt;
-import com.github.javaparser.ast.stmt.ThrowStmt;
+import com.github.javaparser.ast.stmt.Statement;
 import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
 
 import java.util.List;
@@ -30,14 +29,12 @@ public class FieldsFromGettersVisitor extends VoidVisitorAdapter<CompilationUnit
     @Override
     public void visit(ClassOrInterfaceDeclaration aClass, CompilationUnit compilationUnit) {
         aClass.setInterface(false);
-        aClass.setName(aClass.getNameAsString() + "Impl");
         List<MethodDeclaration> aClassAll = aClass.findAll(MethodDeclaration.class);
 
-
         CodeUtils.reversedStream(aClassAll
-                .stream())
+                        .stream())
                 .forEach(method -> {
-
+                    MethodDeclaration oldMethod = method.clone();
                     method.setPublic(true);
                     BlockStmt blockStmt = new BlockStmt();
                     method.setBody(blockStmt);
@@ -64,11 +61,11 @@ public class FieldsFromGettersVisitor extends VoidVisitorAdapter<CompilationUnit
                         ReturnStmt returnStmt = new ReturnStmt(fieldDeclaration.getVariable(0).getNameAsExpression());
                         blockStmt.addStatement(returnStmt);
                     } else {
-                        ThrowStmt throwExpression = new ThrowStmt();
-                        ObjectCreationExpr expression = new ObjectCreationExpr();
-                        expression.setType("UnsupportedOperationException");
-                        throwExpression.setExpression(expression);
-                        blockStmt.addStatement(throwExpression);
+                        oldMethod.getBody().ifPresent(b -> {
+                            for (Statement statement : b.getStatements()) {
+                                blockStmt.addStatement(statement);
+                            }
+                        });
                     }
 
                 });

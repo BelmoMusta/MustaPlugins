@@ -21,51 +21,54 @@ import javax.swing.*;
 import java.util.Optional;
 
 public class RestWSCreator extends Transformer {
-	@Override
-	public CompilationUnit generate(CompilationUnit code) {
-		final String wsSignature = JOptionPane.showInputDialog("Enter WS signature");
-		Optional<ClassOrInterfaceDeclaration> first = code.findFirst(ClassOrInterfaceDeclaration.class);
-		if (first.isPresent()) {
-			WsSignature signature = WsSignature.createWsSignature(wsSignature);
-			ClassOrInterfaceDeclaration classOrInterfaceDeclaration = first.get();
-			if (!classOrInterfaceDeclaration.isInterface()) {
-				MethodDeclaration restMethod =
-						classOrInterfaceDeclaration.addMethod(signature.getPossibleMethodName(),
-								Modifier.PUBLIC);
-				NormalAnnotationExpr normalAnnotationExpr = new NormalAnnotationExpr();
-				normalAnnotationExpr.setName(StringUtils.capitalize(signature.getMethod().toLowerCase()) + "Mapping");
-				normalAnnotationExpr.addPair("value", "\"" + signature.getUrl() + "\"");
-				normalAnnotationExpr.addPair("produces", "\"application/json\"");
-				restMethod.addAnnotation(normalAnnotationExpr);
-				
-				BlockStmt body = new BlockStmt();
-				for (WsParam wsParam : signature.getWsParams()) {
-					Parameter parameter = new Parameter();
-					parameter.setType(wsParam.getType());
-					parameter.setName(wsParam.getName());
-					AnnotationExpr pathVariable = new MarkerAnnotationExpr();
-					pathVariable.setName(wsParam.getAnnotation());
-					parameter.addAnnotation(pathVariable);
-					TypeParameter type = new TypeParameter();
-					type.setName("ResponseEntity");
-					restMethod.setType(type);
-					restMethod.addParameter(parameter);
-				}
-				ReturnStmt returnStmt = new ReturnStmt();
-				returnStmt.setExpression(new NullLiteralExpr());
-				returnStmt.setComment(new BlockComment("TODO complete this method"));
-				body.addStatement(returnStmt);
-				restMethod.setBody(body);
-			}
-		}
-		return code;
-		
-	}
-	
-	public static void main(String[] args) {
-		String signatureAsString = "GET /interne/instance/{idInstance}";
-        System.out.println(WsSignature.createWsSignature(signatureAsString));
+    @Override
+    public CompilationUnit generate(CompilationUnit code) {
+        final String wsSignature = JOptionPane.showInputDialog("Enter WS signature");
+        return createWSSignature(code, wsSignature);
+
     }
-	
-	
+
+    public CompilationUnit createWSSignature(CompilationUnit code_, String wsSignature) {
+        CompilationUnit compilationUnit = Optional.ofNullable(code_)
+                .map(CompilationUnit::clone)
+                .orElse(new CompilationUnit());
+
+        Optional<ClassOrInterfaceDeclaration> first = compilationUnit.findFirst(ClassOrInterfaceDeclaration.class);
+        ClassOrInterfaceDeclaration classOrInterfaceDeclaration;
+
+        classOrInterfaceDeclaration = first.orElseGet(() -> compilationUnit.addClass("EmptyClass"));
+        WsSignature signature = WsSignature.createWsSignature(wsSignature);
+        if (!classOrInterfaceDeclaration.isInterface()) {
+            MethodDeclaration restMethod =
+                    classOrInterfaceDeclaration.addMethod(signature.getPossibleMethodName(),
+                            Modifier.PUBLIC);
+            NormalAnnotationExpr normalAnnotationExpr = new NormalAnnotationExpr();
+            normalAnnotationExpr.setName(StringUtils.capitalize(signature.getMethod().toLowerCase()) + "Mapping");
+            normalAnnotationExpr.addPair("value", "\"" + signature.getUrl() + "\"");
+            normalAnnotationExpr.addPair("produces", "\"application/json\"");
+            restMethod.addAnnotation(normalAnnotationExpr);
+
+            BlockStmt body = new BlockStmt();
+            for (WsParam wsParam : signature.getWsParams()) {
+                Parameter parameter = new Parameter();
+                parameter.setType(wsParam.getType());
+                parameter.setName(wsParam.getName());
+                AnnotationExpr pathVariable = new MarkerAnnotationExpr();
+                pathVariable.setName(wsParam.getAnnotation());
+                parameter.addAnnotation(pathVariable);
+                TypeParameter type = new TypeParameter();
+                type.setName("ResponseEntity");
+                restMethod.setType(type);
+                restMethod.addParameter(parameter);
+            }
+            ReturnStmt returnStmt = new ReturnStmt();
+            returnStmt.setExpression(new NullLiteralExpr());
+            returnStmt.setComment(new BlockComment("TODO complete this method"));
+            body.addStatement(returnStmt);
+            restMethod.setBody(body);
+        }
+        return compilationUnit;
+    }
+
+
 }

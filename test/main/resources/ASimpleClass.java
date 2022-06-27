@@ -3,45 +3,34 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class ASimpleClass {
-
-    int x;
-
-    int y;
-
-    int z;
-
-    boolean valid;
+public class ASimpleClassImpl {
 
     public int getX() {
-        return x;
+        return aX;
     }
 
     public void setX(int x) {
-        this.x = x;
+        aX = x;
     }
 
     public int getY() {
-        return y;
+        return aY;
     }
 
     public void setY(int y) {
-        this.y = y;
+        aY = y;
     }
 
     public int getZ() {
-        return z;
+        return aZ;
     }
 
     public void setZ(int z) {
-        this.z = z;
+        aZ = z;
     }
 
     public boolean isValid() {
-        return valid;
+        return aValid;
     }
 
-    public void setValid(boolean valid) {
-        this.valid = valid;
-    }
 }

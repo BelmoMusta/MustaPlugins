@@ -58,6 +58,7 @@ public class CodeUtils {
      * The {@link #IS_GETTER} Constant of type {@link Predicate<MethodDeclaration>} holding the value aMethod -> aMethod.getName().toString().startsWith("get") && aMethod.getParameters().isEmpty().
      */
     public static final Predicate<MethodDeclaration> IS_GETTER = aMethod -> aMethod.getName().toString().startsWith("get") && aMethod.getParameters().isEmpty();
+    public static final Predicate<MethodDeclaration> IS_IS = aMethod -> aMethod.getName().toString().startsWith("is") && aMethod.getParameters().isEmpty();
 
     /**
      * The {@link #IS_BOOLEAN_ACCESSOR} Constant of type {@link Predicate<MethodDeclaration>} holding the value aMethod -> aMethod.getName().toString().startsWith("is").

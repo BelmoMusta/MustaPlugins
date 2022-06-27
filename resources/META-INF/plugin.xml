@@ -52,6 +52,11 @@
                     description="Wraps a statement with Optional">
             </action>
 
+            <action id="musta.belmo.plugins.action.text.AddNullCheckAction"
+                    class="musta.belmo.plugins.action.text.AddNullCheckAction" text="Add Null Check"
+                    description="Adds a null check on the selected variable">
+            </action>
+
             <action id="musta.belmo.plugins.action.FieldsFromGettersAction"
                     class="musta.belmo.plugins.action.FieldsFromGettersAction" text="Fields from getters"
                     description="Generates fields from getters">
