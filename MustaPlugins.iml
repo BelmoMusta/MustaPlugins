@@ -7,7 +7,9 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="library" name="javaparser-core-3.6.2" level="project" />
-    <orderEntry type="library" name="json-20150729" level="project" />
+    <orderEntry type="library" name="libs" level="project" />
+  </component>
+  <component name="SonarLintModuleSettings">
+    <option name="uniqueId" value="7974d3cf-3263-48d4-9022-faa1fde90c0c" />
   </component>
 </module>

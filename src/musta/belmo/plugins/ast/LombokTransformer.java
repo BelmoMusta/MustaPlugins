@@ -2,14 +2,12 @@ package musta.belmo.plugins.ast;
 
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
-import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
-import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.expr.MarkerAnnotationExpr;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
-import java.util.function.Predicate;
 
 /**
  * Generates Fields from gettes
@@ -19,68 +17,104 @@ import java.util.function.Predicate;
  * @since 0.0.0.SNAPSHOT
  */
 public class LombokTransformer extends Transformer {
-    private static LombokTransformer INSTANCE;
-
-    public static LombokTransformer getInstance() {
-        if (INSTANCE == null) {
-            INSTANCE = new LombokTransformer();
-        }
-        return INSTANCE;
+    private final List<String> annotations;
+    public LombokTransformer(List<String> annotations) {
+        this.annotations = annotations;
     }
 
     /**
      * @param compilationUnitSrc {@link CompilationUnit}
+     * @param line
      * @return CompilationUnit
      */
     @Override
-    public CompilationUnit generate(CompilationUnit compilationUnitSrc) {
-        boolean isAddLombok = false;
-        CompilationUnit clone = compilationUnitSrc.clone();
-        List<MethodDeclaration> methodDeclarations = clone.findAll(MethodDeclaration.class);
-        List<FieldDeclaration> fields = clone.findAll(FieldDeclaration.class);
+    public CompilationUnit generate(CompilationUnit compilationUnitSrc, int line) {
+        MyCloneVisitor myCloneVisitor = new MyCloneVisitor();
+        CompilationUnit clone = (CompilationUnit) compilationUnitSrc.accept(myCloneVisitor, null);
+        if (line == -1) {
+            return null;
+        }
+        Optional<ClassOrInterfaceDeclaration> first =
+                clone.findAll(ClassOrInterfaceDeclaration.class).stream().filter(cls -> {
+                    return cls.getBegin().get().line <= line + 1
+                            && cls.getEnd().get().line >= line + 1;
+                }).findFirst();
+        if (first.isEmpty()) {
+            return null;
+        }
 
-        for (MethodDeclaration aMethod : methodDeclarations) {
-            if (CodeUtils.isGetter(aMethod) || CodeUtils.isIs(aMethod) || CodeUtils.isGetter(aMethod)) {
-                if (hasAssociatedField(aMethod, fields)) {
-                    removeGetterAndSetter(aMethod, clone);
-                    if (!isAddLombok) {
-                        isAddLombok = true;
-                    }
+        Optional<ClassOrInterfaceDeclaration> innerClass =
+                first.get().findAll(ClassOrInterfaceDeclaration.class).stream().filter(cls ->
+                        !cls.equals(first.get())
+                                && cls.getBegin().get().line <= line + 1
+                                && cls.getEnd().get().line >= line + 1).findFirst();
+        final MethodToFieldBinderVisitor visitor;
+        ClassOrInterfaceDeclaration classOrInterfaceDeclaration;
+
+        classOrInterfaceDeclaration = innerClass.orElseGet(first::get);
+        visitor = new MethodToFieldBinderVisitor(classOrInterfaceDeclaration);
+
+
+        int nbDeletedMethods = 0;
+        for (Map.Entry<String, MethodFieldPair> keyValue : visitor.entrySet()) {
+            MethodFieldPair value = keyValue.getValue();
+            MethodDeclaration getterMethod = value.getGetterMethod();
+            MethodDeclaration setterMethod = value.getSetterMethod();
+            if (getterMethod != null) {
+                if (annotations.contains("Getter")) {
+                    getterMethod.remove();
+                    nbDeletedMethods++;
                 }
-
+            }
+            if (setterMethod != null) {
+                if (annotations.contains("Setter")) {
+                    setterMethod.remove();
+                    nbDeletedMethods++;
+                }
             }
         }
-        if (isAddLombok) {
-            addLombokAnnotations(clone);
+
+        if (nbDeletedMethods > 0) {
+            addLombokAnnotations(classOrInterfaceDeclaration);
+            if (annotations.contains("Getter")) {
+                long countOfLombokGetterImports = clone.getImports().stream()
+                        .filter(imp -> imp.toString().contains("lombok.Getter"))
+                        .count();
+                if (countOfLombokGetterImports == 0L) {
+                    clone.addImport("lombok.Getter");
+                }
+            }
+
+            if (annotations.contains("Setter")) {
+                long countOfLombokSetterImports = clone.getImports().stream()
+                        .filter(imp -> imp.toString().contains("lombok.Setter"))
+                        .count();
+                if (countOfLombokSetterImports == 0L) {
+                    clone.addImport("lombok.Setter");
+                }
+            }
+
         }
 
         return clone;
     }
 
-    private void removeGetterAndSetter(MethodDeclaration aMethod, CompilationUnit clone) {
-        final String nameAsString = aMethod.getNameAsString();
-        Predicate<MethodDeclaration> setterFromGetter = methodDeclaration -> ("set" + nameAsString.substring(3)).equals(methodDeclaration.getNameAsString());
-        Predicate<MethodDeclaration> setterFromIs = methodDeclaration -> ("set" + nameAsString.substring(2)).equals(methodDeclaration.getNameAsString());
-        final Optional<MethodDeclaration> setter = clone.findFirst(MethodDeclaration.class, setterFromGetter.or(setterFromIs));
-        setter.ifPresent(MethodDeclaration::remove);
-        aMethod.remove();
+    private void addLombokAnnotations(ClassOrInterfaceDeclaration cls) {
+        if (annotations.contains("Getter")) {
+            long countGetterAnnotations = cls.findAll(MarkerAnnotationExpr.class,
+                    p -> p.getNameAsString().equals("Getter")).size();
+            if (countGetterAnnotations == 0L) {
+                cls.addAnnotation(new MarkerAnnotationExpr("Getter"));
+            }
+        }
+
+        if (annotations.contains("Setter")) {
+            long countSetterAnnotations = cls.findAll(MarkerAnnotationExpr.class,
+                    p -> p.getNameAsString().equals("Setter")).size();
+            if (countSetterAnnotations == 0L) {
+                cls.addAnnotation(new MarkerAnnotationExpr("Setter"));
+            }
+        }
     }
 
-    private void addLombokAnnotations(CompilationUnit clone) {
-        clone.addImport("lombok.Getter");
-        clone.addImport("lombok.Setter");
-        ClassOrInterfaceDeclaration cls = clone.findAll(ClassOrInterfaceDeclaration.class).get(0);
-        cls.addAnnotation(new MarkerAnnotationExpr("Getter"));
-        cls.addAnnotation(new MarkerAnnotationExpr("Setter"));
-    }
-
-    private boolean hasAssociatedField(MethodDeclaration aMethod, List<FieldDeclaration> fields) {
-        return fields.stream()
-                .anyMatch(fieldDeclaration -> {
-                    VariableDeclarator variableDeclarator = fieldDeclaration.getVariables().get(0);
-                    boolean findFieldFromGetterOrSetter = variableDeclarator.getNameAsString().equals(CodeUtils.toLowerCaseFirstLetter(aMethod.getNameAsString().substring(3)));
-                    boolean findFieldFromIs = variableDeclarator.getNameAsString().equals(CodeUtils.toLowerCaseFirstLetter(aMethod.getNameAsString().substring(2)));
-                    return findFieldFromGetterOrSetter || findFieldFromIs;
-                });
-    }
 }

@@ -12,11 +12,11 @@ import com.github.javaparser.ast.CompilationUnit;
 public class FieldsFromGetters extends Transformer {
 
     /**
-     *
      * @param compilationUnitSrc {@link CompilationUnit}
+     * @param line
      * @return CompilationUnit
      */
-    public CompilationUnit generate(CompilationUnit compilationUnitSrc) {
+    public CompilationUnit generate(CompilationUnit compilationUnitSrc, int line) {
         CompilationUnit compilationUnit = compilationUnitSrc.clone();
         compilationUnit.accept(new FieldsFromGettersVisitor(), compilationUnit);
         return compilationUnit;

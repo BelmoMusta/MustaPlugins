@@ -34,11 +34,11 @@ public class GenerateOnDemandHolderPattern extends Transformer{
         return INSTANCE;
     }
     /**
-     *
      * @param compilationUnitSrc {@link CompilationUnit}
+     * @param line
      * @return CompilationUnit
      */
-    public CompilationUnit generate(CompilationUnit compilationUnitSrc) {
+    public CompilationUnit generate(CompilationUnit compilationUnitSrc, int line) {
         CompilationUnit compilationUnit = compilationUnitSrc.clone();
         List<ClassOrInterfaceDeclaration> classes = compilationUnit.findAll(ClassOrInterfaceDeclaration.class);
         classes.stream().filter(aClass -> !aClass.isInterface())

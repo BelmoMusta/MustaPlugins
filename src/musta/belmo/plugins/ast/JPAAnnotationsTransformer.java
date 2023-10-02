@@ -33,10 +33,11 @@ public class JPAAnnotationsTransformer extends Transformer {
 
     /**
      * @param compilationUnitSrc {@link CompilationUnit}
+     * @param line
      * @return CompilationUnit
      */
     @Override
-    public CompilationUnit generate(CompilationUnit compilationUnitSrc) {
+    public CompilationUnit generate(CompilationUnit compilationUnitSrc, int line) {
         CompilationUnit clone = compilationUnitSrc.clone();
         List<MethodDeclaration> methodDeclarations = clone.findAll(MethodDeclaration.class);
         List<FieldDeclaration> fields = clone.findAll(FieldDeclaration.class);

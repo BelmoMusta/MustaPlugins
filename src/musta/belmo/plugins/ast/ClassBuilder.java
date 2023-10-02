@@ -25,7 +25,7 @@ import java.util.stream.Stream;
 public class ClassBuilder extends Transformer {
 
     @Override
-    public CompilationUnit generate(CompilationUnit code) {
+    public CompilationUnit generate(CompilationUnit code, int line) {
         return buildFromClass(code, "Builder");
     }
 
