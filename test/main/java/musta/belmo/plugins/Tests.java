@@ -78,10 +78,10 @@ public class Tests {
     public void testCreateWsSignature() {
         RestWSCreator transformer = new RestWSCreator();
 
-        String signatureAsString = "GET /interne/instance/{idInstance}";
-        System.out.println(transformer.createWSSignature(null, signatureAsString));
-        signatureAsString = "POST /interne/instance/{idInstance}";
-        System.out.println(transformer.createWSSignature(null, signatureAsString));
+//        String signatureAsString = "GET /interne/instance/{idInstance}";
+//        System.out.println(transformer.generate(null, signatureAsString));
+//        signatureAsString = "POST /interne/instance/{idInstance}";
+//        System.out.println(transformer.createWSSignature(null, signatureAsString));
 
     }
 }
