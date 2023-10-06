@@ -150,7 +150,7 @@ public class LombokTransformer extends Transformer {
         }
     }
     @Override
-    public LombokWrapper transform(PsiJavaFile psiJavaFile, int line) {
+    public String transform(PsiJavaFile psiJavaFile, int line) {
         LombokWrapper lombokWrapper = new LombokWrapper(psiJavaFile);
         CompilationUnit compilationUnit = MyJavaParser.parse(psiJavaFile.getText());
 
@@ -165,13 +165,12 @@ public class LombokTransformer extends Transformer {
             }
             for (ClassOrInterfaceDeclaration selectedClass :
                     classes) {
-                PsiClass[] classes1 = psiJavaFile.getClasses();
                 deleteGettersAndSetters(selectedClass, compilationUnit);
                 deleteConstructors(selectedClass, compilationUnit);
                 addBuilder(selectedClass, compilationUnit);
                 addData(selectedClass, compilationUnit);
             }
-            return lombokWrapper;
+            return compilationUnit.toString();
         }
 
         ClassOrInterfaceDeclaration selectedClass = getSelectedClass(line, compilationUnit);
@@ -183,6 +182,6 @@ public class LombokTransformer extends Transformer {
         addBuilder(selectedClass, compilationUnit);
         addData(selectedClass, compilationUnit);
 
-        return lombokWrapper;
+        return compilationUnit.toString();
     }
 }

@@ -19,7 +19,7 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiJavaFile;
 import com.intellij.psi.impl.file.PsiJavaDirectoryImpl;
-import musta.belmo.plugins.ast.Transformer;
+import musta.belmo.plugins.ast.PsiLombokTransformer;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -28,8 +28,8 @@ import java.util.Stack;
 
 public abstract class AbstractAction extends AnAction {
 
-    private Transformer transformer;
-    private PsiDocumentManager psiDocumentManager;
+    private PsiLombokTransformer transformer;
+    protected PsiDocumentManager psiDocumentManager;
 
     @Override
     public void update(AnActionEvent e) {
@@ -43,8 +43,8 @@ public abstract class AbstractAction extends AnAction {
             return;
         }
 
-        transformer = getTransformer();
         psiDocumentManager = PsiDocumentManager.getInstance(event.getProject());
+        transformer = getTransformer();
         PsiFile psiFile = event.getData(CommonDataKeys.PSI_FILE);
         Navigatable navigatable = event.getData(CommonDataKeys.NAVIGATABLE);
         List<PsiJavaFile> allFiles = new ArrayList<>();
@@ -71,16 +71,16 @@ public abstract class AbstractAction extends AnAction {
         FileDocumentManager fileDocumentManager = FileDocumentManager.getInstance();
         Document document = fileDocumentManager.getDocument(virtualFile);
         if (document != null) {
-            fileDocumentManager.saveDocument(document); // get the last state of a document
+            fileDocumentManager.saveDocument(document);
             try {
-                final LombokWrapper lombokWrapper = transformer.transform(psiJavaFile, line);
+                final PsiJavaFile transformedText = transformer.transformPsi(psiJavaFile, line);
 
-                if (lombokWrapper == null) {
+                if (transformedText == null) {
                     return;
                 }
                 final Runnable runnable = () -> {
-
-                    applyLombokWrapperToFile(lombokWrapper);
+                    String psiJavaFileText = psiJavaFile.getText();
+                    document.setText(psiJavaFileText);
                     psiDocumentManager.commitDocument(document);
                 };
                 ApplicationManager.getApplication().runWriteAction(getRunnableWrapper(runnable,
@@ -91,18 +91,15 @@ public abstract class AbstractAction extends AnAction {
             }
         }
     }
-    private void applyLombokWrapperToFile(LombokWrapper lombokWrapper) {
-
-    }
 
     private Runnable getRunnableWrapper(final Runnable runnable, Project project) {
         return () -> CommandProcessor.getInstance().executeCommand(project, runnable, "cut", ActionGroup.EMPTY_GROUP);
     }
 
-    protected  Transformer getTransformer(){
+    protected  PsiLombokTransformer getTransformer(){
         return getTransformer(new ArrayList<>());
     }
-    protected abstract Transformer getTransformer(List<PsiJavaFile> psiFiles);
+    protected abstract PsiLombokTransformer getTransformer(List<PsiJavaFile> psiFiles);
     private List<PsiJavaFile> getAllJavaFiles(PsiDirectory dir) {
         List<PsiJavaFile> files = new ArrayList<>();
         Stack<PsiElement> stack = new Stack<>();
