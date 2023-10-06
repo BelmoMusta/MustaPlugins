@@ -1,12 +1,11 @@
 <idea-plugin>
-    <id>musta.belmo.plugins</id>
-    <name>MustaPlugin</name>
+    <id>musta.belmo.plugins.lombokify</id>
+    <name>Lombokify</name>
     <version>1.0</version>
     <vendor email="belmokhtar.91@gmail.com" url="https://github.com/BelmoMusta">MustaBelmo</vendor>
 
     <description><![CDATA[
-  This plugin removes the annotations over the methods and moves them back to the fields.
-  It also allows the use of lombok annotations to get rid of getters and setters
+  This plugin helps to apply lombok annotation on classes automatically.
 
                     Developed with ♥ by mustabelmo
 ]]></description>
@@ -32,71 +31,16 @@
     <actions>
         <group id="musta.belmo.plugins.action.CustomDefaultActionGroup"
                class="musta.belmo.plugins.action.CustomDefaultActionGroup"
-               text="MustaActions" description="Musta Actions">
+               text="Lombokify" description="Lombokify">
 
             <add-to-group group-id="EditorPopupMenu" anchor="first"/>
             <add-to-group group-id="ToolsMenu" anchor="first"/>
+            <add-to-group group-id="ProjectViewPopupMenu" anchor="first"/>
             <!-- Add your actions here -->
-            <action id="musta.belmo.plugins.action.JPAAnnotationRemoverAction"
-                    class="musta.belmo.plugins.action.JPAAnnotationRemoverAction" text="Move JPA annotations to fields"
-                    description="description">
-            </action>
-
             <action id="musta.belmo.plugins.action.LombokifyAction"
                     class="musta.belmo.plugins.action.LombokifyAction" text="Lombokify"
                     description="Turn into lombok class">
             </action>
-
-            <action id="musta.belmo.plugins.action.text.ToOptionalAction"
-                    class="musta.belmo.plugins.action.text.ToOptionalAction" text="Wrap with Optional"
-                    description="Wraps a statement with Optional">
-            </action>
-
-            <action id="musta.belmo.plugins.action.text.AddNullCheckAction"
-                    class="musta.belmo.plugins.action.text.AddNullCheckAction" text="Add Null Check"
-                    description="Adds a null check on the selected variable">
-            </action>
-
-            <action id="musta.belmo.plugins.action.FieldsFromGettersAction"
-                    class="musta.belmo.plugins.action.FieldsFromGettersAction" text="Fields from getters"
-                    description="Generates fields from getters">
-            </action>
-
-            <action id="musta.belmo.plugins.action.ClassBuilderAction"
-                    class="musta.belmo.plugins.action.ClassBuilderAction" text="ClassBuilderAction"
-                    description="ClassBuilderAction">
-            </action>
-
-            <action id="musta.belmo.plugins.action.text.UnicodifyAction"
-                    class="musta.belmo.plugins.action.text.UnicodifyAction" text="Unicodify"
-                    description="Turn non unicode characters into unicode identifier">
-            </action>
-
-            <action id="musta.belmo.plugins.action.text.CamelCaseAction"
-                    class="musta.belmo.plugins.action.text.CamelCaseAction" text="camel case"
-                    description="Turn a text into a camel case format">
-            </action>
-
-            <action id="musta.belmo.plugins.action.text.UnUnicodifyAction"
-                    class="musta.belmo.plugins.action.text.UnUnicodifyAction" text="UnUnicodify"
-                    description="Turn unicode identifiers into ISO-8859-1 characters">
-            </action>
-
-            <action id="musta.belmo.plugins.action.text.DecodeBase64Action"
-                    class="musta.belmo.plugins.action.text.DecodeBase64Action" text="Decode 64 "
-                    description="Decode a 64 based text">
-            </action>
-
-            <action id="musta.belmo.plugins.action.text.EncodeBase64Action"
-                    class="musta.belmo.plugins.action.text.EncodeBase64Action" text="Encode 64 "
-                    description="Encode a 64 based text">
-            </action>
-
-            <action id="musta.belmo.plugins.action.RestWsCreatorAction"
-                    class="musta.belmo.plugins.action.RestWsCreatorAction" text="Create REST WS"
-                    description="Create ws rest service">
-            </action>
-
         </group>
     </actions>
 

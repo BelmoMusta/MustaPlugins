@@ -2,6 +2,7 @@ package musta.belmo.plugins.ast;
 
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Modifier;
+import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
@@ -27,10 +28,12 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.EnumSet;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -300,7 +303,9 @@ public class CodeUtils {
         FieldDeclaration fieldDeclaration = new FieldDeclaration();
         VariableDeclarator variable = new VariableDeclarator(type, name);
         fieldDeclaration.getVariables().add(variable);
-        fieldDeclaration.setModifiers(Arrays.stream(modifiers).collect(toCollection(() -> EnumSet.noneOf(Modifier.class))));
+        NodeList<Modifier> listModifiers = new NodeList<>();
+        listModifiers.addAll(Arrays.asList(modifiers));
+        fieldDeclaration.setModifiers(listModifiers);
         return fieldDeclaration;
     }
 

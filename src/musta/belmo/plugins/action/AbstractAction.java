@@ -1,7 +1,5 @@
 package musta.belmo.plugins.action;
 
-import com.github.javaparser.ast.CompilationUnit;
-import com.github.javaparser.printer.PrettyPrinterConfiguration;
 import com.intellij.openapi.actionSystem.ActionGroup;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
@@ -10,22 +8,28 @@ import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.command.CommandProcessor;
 import com.intellij.openapi.editor.Caret;
 import com.intellij.openapi.editor.Document;
-import com.intellij.openapi.editor.VisualPosition;
+import com.intellij.openapi.editor.LogicalPosition;
 import com.intellij.openapi.fileEditor.FileDocumentManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.pom.Navigatable;
+import com.intellij.psi.PsiDirectory;
+import com.intellij.psi.PsiDocumentManager;
+import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
+import com.intellij.psi.PsiJavaFile;
+import com.intellij.psi.impl.file.PsiJavaDirectoryImpl;
 import musta.belmo.plugins.ast.Transformer;
-import musta.belmo.plugins.dialog.LombokSelectorDialog;
 import org.jetbrains.annotations.NotNull;
 
-import javax.swing.*;
-import java.awt.event.InputEvent;
-import java.awt.event.MouseEvent;
-import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Stack;
 
 public abstract class AbstractAction extends AnAction {
 
+    private Transformer transformer;
+    private PsiDocumentManager psiDocumentManager;
 
     @Override
     public void update(AnActionEvent e) {
@@ -35,47 +39,85 @@ public abstract class AbstractAction extends AnAction {
 
     @Override
     public void actionPerformed(@NotNull AnActionEvent event) {
+        if (event.getProject() == null) {
+            return;
+        }
+
+        transformer = getTransformer();
+        psiDocumentManager = PsiDocumentManager.getInstance(event.getProject());
         PsiFile psiFile = event.getData(CommonDataKeys.PSI_FILE);
+        Navigatable navigatable = event.getData(CommonDataKeys.NAVIGATABLE);
+        List<PsiJavaFile> allFiles = new ArrayList<>();
+
+        if (psiFile instanceof PsiJavaFile psiJavaFile) {
+            allFiles.add(psiJavaFile);
+        } else if (navigatable instanceof PsiJavaDirectoryImpl directory) {
+            allFiles.addAll(getAllJavaFiles(directory));
+        }
+        for (PsiJavaFile file : allFiles) {
+            applyActionToDocument(event, file);
+        }
+    }
+    private void applyActionToDocument(@NotNull AnActionEvent event,
+                                       PsiJavaFile psiJavaFile) {
+        VirtualFile virtualFile = psiJavaFile.getVirtualFile();
+
         Caret caret = event.getData(CommonDataKeys.CARET);
         int line = -1;
         if (caret != null) {
-            VisualPosition leadSelectionPosition = caret.getLeadSelectionPosition();
-            line = leadSelectionPosition.getLine();
+            LogicalPosition logicalPosition = caret.getLogicalPosition();
+            line = logicalPosition.line;
         }
-        if (psiFile != null && psiFile.getName().endsWith(".java")) {
-            VirtualFile virtualFile = psiFile.getVirtualFile();
-            FileDocumentManager fileDocumentManager = FileDocumentManager.getInstance();
-            Document document = fileDocumentManager.getDocument(virtualFile);
-            if (document != null) {
-                fileDocumentManager.saveDocument(document); // get the last state of a document
-                try {
-                    final String text = document.getText();
-                    final CompilationUnit generate = getTransformer().generate(text, line);
+        FileDocumentManager fileDocumentManager = FileDocumentManager.getInstance();
+        Document document = fileDocumentManager.getDocument(virtualFile);
+        if (document != null) {
+            fileDocumentManager.saveDocument(document); // get the last state of a document
+            try {
+                final LombokWrapper lombokWrapper = transformer.transform(psiJavaFile, line);
 
-                    if (generate == null) {
-                        return;
-                    }
-                    final Runnable runnable = () -> {
-//                        PrettyPrinterConfiguration prettyPrinterConfiguration = new PrettyPrinterConfiguration();
-//						prettyPrinterConfiguration.setColumnAlignFirstMethodChain(true);
-//						prettyPrinterConfiguration.setColumnAlignParameters(true);
-//                        prettyPrinterConfiguration.setEndOfLineCharacter("\n");
-                        document.setText(generate.toString());
-                        fileDocumentManager.saveDocument(document);
-                    };
-                    ApplicationManager.getApplication().runWriteAction(getRunnableWrapper(runnable,
-                            event.getProject()));
-
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
+                if (lombokWrapper == null) {
+                    return;
                 }
+                final Runnable runnable = () -> {
+
+                    applyLombokWrapperToFile(lombokWrapper);
+                    psiDocumentManager.commitDocument(document);
+                };
+                ApplicationManager.getApplication().runWriteAction(getRunnableWrapper(runnable,
+                        event.getProject()));
+
+            } catch (Exception e) {
+                throw new RuntimeException(e);
             }
         }
+    }
+    private void applyLombokWrapperToFile(LombokWrapper lombokWrapper) {
+
     }
 
     private Runnable getRunnableWrapper(final Runnable runnable, Project project) {
         return () -> CommandProcessor.getInstance().executeCommand(project, runnable, "cut", ActionGroup.EMPTY_GROUP);
     }
 
-    protected abstract Transformer getTransformer();
+    protected  Transformer getTransformer(){
+        return getTransformer(new ArrayList<>());
+    }
+    protected abstract Transformer getTransformer(List<PsiJavaFile> psiFiles);
+    private List<PsiJavaFile> getAllJavaFiles(PsiDirectory dir) {
+        List<PsiJavaFile> files = new ArrayList<>();
+        Stack<PsiElement> stack = new Stack<>();
+        stack.push(dir);
+        while (!stack.isEmpty()) {
+            PsiElement child = stack.pop();
+            if (child instanceof PsiDirectory psiDirectory) {
+                for (PsiElement f : psiDirectory.getChildren()) {
+                    stack.push(f);
+                }
+            } else if (child instanceof PsiJavaFile psiFile) {
+                files.add(psiFile);
+            }
+        }
+        return files;
+    }
+
 }
