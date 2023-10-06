@@ -1,20 +1,21 @@
 package musta.belmo.plugins.ast;
 
 import com.intellij.openapi.editor.Document;
+import com.intellij.psi.PsiAssignmentExpression;
 import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiDocumentManager;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiExpression;
+import com.intellij.psi.PsiExpressionStatement;
 import com.intellij.psi.PsiField;
 import com.intellij.psi.PsiJavaFile;
-import com.intellij.psi.PsiKeyword;
 import com.intellij.psi.PsiMethod;
-import com.intellij.psi.PsiModifierList;
 import com.intellij.psi.PsiReferenceExpression;
 import com.intellij.psi.PsiReturnStatement;
 import com.intellij.psi.PsiStatement;
 import com.intellij.refactoring.JavaRefactoringFactory;
 import com.intellij.refactoring.SafeDeleteRefactoring;
+import com.intellij.usageView.UsageInfo;
 import musta.belmo.plugins.action.DFS;
 
 import java.util.ArrayList;
@@ -22,13 +23,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-/**
- * Generates Fields from gettes
- *
- * @author default author
- * @version 0.0.0
- * @since 0.0.0.SNAPSHOT
- */
+
 public class PsiLombokTransformer {
     private final List<String> annotations;
     private PsiDocumentManager documentManager;
@@ -59,34 +54,57 @@ public class PsiLombokTransformer {
             boolean ignoreField = ModifiersHelper.isStatic(field);
             if (!ignoreField) {
                 fieldsToBeLombokified.add(field);
-//                    SafeDeleteRefactoring safeDelete = javaRefactoringFactory.createSafeDelete(new PsiElement[]{field});
-//                    UsageInfo[] usages = safeDelete.findUsages();
-//                    field.getReferences();
-            //    safeDeleteMethods.doRefactoring(usages);
             }
-
         }
-        List<PsiMethod> methodsToBeRemoved = new ArrayList<>();
-        List<PsiMethod> methods = Arrays.asList(psiClass.getMethods())
+
+        List<PsiMethod> methodsToBeRemoved = Arrays.asList(psiClass.getMethods())
                 .stream().filter(psiMethod ->
-                        psiMethod.getBody() != null
-                   && !ModifiersHelper.isStatic(psiMethod)
+                        (psiMethod.getName().startsWith("set")
+                                || psiMethod.getName().startsWith("get")
+                                || psiMethod.getName().startsWith("is"))
+                                && psiMethod.getBody() != null
+                                && !ModifiersHelper.isStatic(psiMethod)
+                                && isAssociatedWithAField(psiMethod, fieldsToBeLombokified)
                 ).collect(Collectors.toList());
 
-        for (PsiMethod method : methods) {
-            PsiStatement[] statements = method.getBody().getStatements();
-            for (PsiStatement statement : statements) {
-                if (statement instanceof PsiReturnStatement returnStatement){
-                    PsiExpression returnValue = returnStatement.getReturnValue();
-                    if (returnValue instanceof PsiReferenceExpression referenceExpression) {
-                        System.out.println(referenceExpression);
-                        referenceExpression.getReference().getElement();
+        PsiElement[] methods = new PsiElement[methodsToBeRemoved.size()];
+        for (int i = 0; i < methodsToBeRemoved.size(); i++) {
+            methods[i] = methodsToBeRemoved.get(i);
+        }
+        SafeDeleteRefactoring safeDelete = javaRefactoringFactory.createSafeDelete(methods);
+        UsageInfo[] usages = safeDelete.findUsages();
+        safeDelete.doRefactoring(usages);
+    }
+    private static boolean isAssociatedWithAField(PsiMethod method, List<PsiField> fieldsToBeLombokified) {
+        boolean isMethodAssociatedWithAField = false;
+        PsiStatement[] statements = method.getBody().getStatements();
+        for (PsiStatement statement : statements) {
+            if (statement instanceof PsiReturnStatement returnStatement) { // getter
+                PsiExpression returnValue = returnStatement.getReturnValue();
+                if (returnValue instanceof PsiReferenceExpression referenceExpression) {
+                    for (PsiField psiField : fieldsToBeLombokified) {
+                        if (psiField.getName().equals(referenceExpression.getText())) {
+                            isMethodAssociatedWithAField = true;
+                            break;
+                        }
+                    }
+                }
+            } else if (statement instanceof PsiExpressionStatement psiExpression) {
+                for (PsiElement child : psiExpression.getChildren()) {
+                    if (child instanceof PsiAssignmentExpression assignmentExpression) {
+                        PsiExpression lExpression = assignmentExpression.getLExpression();
+                        for (PsiField psiField : fieldsToBeLombokified) {
+                            if (psiField.getName().equals(lExpression.getText())
+                                    || ("this." + psiField.getName()).equals(lExpression.getText())) {
+                                isMethodAssociatedWithAField = true;
+                                break;
+                            }
+                        }
                     }
                 }
             }
-            System.out.println(method);
         }
-
+        return isMethodAssociatedWithAField;
     }
     private PsiClass getSelectedClass(int line, PsiJavaFile psiJavaFile) {
         List<PsiClass> psiClasses = new ArrayList<>();
