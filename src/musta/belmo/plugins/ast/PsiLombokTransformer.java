@@ -40,7 +40,7 @@ public class PsiLombokTransformer implements Transformer {
     }
 
 
-    public void transformPsi(PsiElement psiElement, int selectedLine) {
+    public void transformPsi(PsiElement psiElement) {
         if (annotations.isEmpty()) {
             return;
         }
@@ -51,18 +51,15 @@ public class PsiLombokTransformer implements Transformer {
         List<PsiClass> classes = new ArrayList<>();
 
         if (psiElement instanceof PsiJavaFile psiJavaFile) {
-            if (selectedLine == -1) {// from folder structure
-                List<PsiClass> allClassesInFile = PsiUtils.getAllClassesInFile(psiJavaFile);
-                classes.addAll(allClassesInFile);
-            } else {
-                PsiClass selectedClass = getSelectedClass(selectedLine, psiJavaFile);
-                if (selectedClass != null) {
-                    classes.add(selectedClass);
-                }
-            }
+            List<PsiClass> allClassesInFile = PsiUtils.getAllClassesInFile(psiJavaFile);
+            classes.addAll(allClassesInFile);
             deleteGettersAndSetters(classes);
             addAnnotations(annotations, classes, psiJavaFile);
         }
+    }
+    @Override
+    public String getActionName() {
+        return "Lombokify";
     }
     private void addAnnotations(List<LombokAnnotation> lombokAnnotations,
                                 List<PsiClass> psiClasses,
@@ -141,7 +138,7 @@ public class PsiLombokTransformer implements Transformer {
         }
         return isMethodAssociatedWithAField;
     }
-    private PsiClass getSelectedClass(int line, PsiJavaFile psiJavaFile) {
+    private PsiClass getSelectedClass(PsiJavaFile psiJavaFile) {
         final List<PsiClass> psiClasses = PsiUtils.getAllClassesInFile(psiJavaFile);
         for (PsiClass psiClass : psiClasses) {
             Document document = documentManager.getDocument(psiJavaFile);

@@ -57,22 +57,6 @@ public class PsiUtils {
                 element -> element instanceof PsiJavaFile,
                 psiElement -> Arrays.asList(psiElement.getChildren()), false);
     }
-    public static int getSelectedLine(@NotNull AnActionEvent event) {
-        FileEditor fileEditor = event.getData(PlatformDataKeys.FILE_EDITOR);
-        final int line;
-        if (fileEditor != null) {
-            FileEditorLocation currentLocation = fileEditor.getCurrentLocation();
-            if (currentLocation instanceof TextEditorLocation textEditorLocation){
-                line = textEditorLocation.getPosition().line;
-            } else {
-                line = -1;
-            }
-
-        } else {
-            line = -1;
-        }
-        return line;
-    }
     public static boolean isStatic(PsiField field) {
         return isWantedModifierFound(field.getModifierList(), "static");
     }

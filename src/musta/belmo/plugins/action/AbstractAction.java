@@ -33,8 +33,6 @@ public abstract class AbstractAction extends AnAction {
         if (event.getProject() == null) {
             return;
         }
-        final int selectedLine = PsiUtils.getSelectedLine(event);
-
         PsiFile psiFile = event.getData(CommonDataKeys.PSI_FILE);
         Navigatable navigatable = event.getData(CommonDataKeys.NAVIGATABLE);
         List<PsiElement> selectedFiles = new ArrayList<>();
@@ -44,17 +42,17 @@ public abstract class AbstractAction extends AnAction {
         } else if (navigatable instanceof PsiJavaDirectoryImpl directory) {
             selectedFiles.addAll(PsiUtils.getAllJavaFiles(directory));
         }
-        applyAction(event, selectedFiles, selectedLine);
+        applyAction(event, selectedFiles);
     }
-    private void applyAction(@NotNull AnActionEvent event, List<PsiElement> psiJavaFiles, int line) {
+    private void applyAction(@NotNull AnActionEvent event, List<PsiElement> psiJavaFiles) {
         transformer = getTransformer();
         try {
             CommandProcessor.getInstance().executeCommand(getEventProject(event),
                     () -> ApplicationManager.getApplication().runWriteAction(() -> {
                         for (PsiElement psiJavaFile : psiJavaFiles) {
-                            transformer.transformPsi(psiJavaFile, line);
+                            transformer.transformPsi(psiJavaFile);
                         }
-                    }), "Lombokify", null);
+                    }), transformer.getActionName(), null);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
