@@ -1,9 +1,7 @@
 package musta.belmo.plugins.ast;
 
-import com.intellij.psi.PsiJavaFile;
+import com.intellij.psi.PsiElement;
 
-public abstract class Transformer {
-    public abstract String transform(PsiJavaFile code, int line);
-
-
+public interface Transformer {
+    void transformPsi(PsiElement psiJavaFile, int selectedLine);
 }

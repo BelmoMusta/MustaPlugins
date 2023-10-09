@@ -8,8 +8,13 @@ public class LombokAnnotation {
         this.importName = importName;
     }
 
+    public LombokAnnotation(String annotation) {
+        this.annotation = annotation;
+        this.importName = "lombok." +annotation;
+    }
+
     public String getAnnotation() {
-        return annotation;
+        return "@"+annotation;
     }
     public String getImportName() {
         return importName;

@@ -1,6 +1,5 @@
 package musta.belmo.plugins.action;
 
-import com.intellij.psi.PsiJavaFile;
 import musta.belmo.plugins.ast.PsiLombokTransformer;
 import org.jetbrains.annotations.NotNull;
 
@@ -10,7 +9,7 @@ import java.util.List;
 
 public class LombokifyAction extends AbstractAction {
     @Override
-    protected PsiLombokTransformer getTransformer(List<PsiJavaFile> psiFiles) {
+    protected PsiLombokTransformer getTransformer() {
         JPanel al = new JPanel();
         List<JCheckBox> checkBoxes = getCheckBoxes();
         for (JCheckBox checkBox : checkBoxes) {
