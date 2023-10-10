@@ -22,6 +22,7 @@ public class PsiLombokTransformer implements Transformer {
         if (psiElement instanceof PsiJavaFile psiJavaFile) {
             List<PsiClass> allClassesInFile = PsiUtils.getAllClassesInFile(psiJavaFile);
             PsiClassUtils.deleteMethods(allClassesInFile, annotations);
+            PsiClassUtils.deleteConstructors(allClassesInFile, annotations);
             PsiClassUtils.addAnnotations(annotations, allClassesInFile);
             PsiUtils.addImports(psiJavaFile, annotations);
         }

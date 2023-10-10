@@ -29,8 +29,8 @@ public class PsiClassUtils {
         }
     }
     public static void addAnnotations(List<LombokAnnotation> lombokAnnotations,
-                                List<PsiClass> psiClasses) {
-        for (PsiClass psiClass : psiClasses) {
+                                      List<PsiClass> classes) {
+        for (PsiClass psiClass : classes) {
             addLombokAnnotations(psiClass, lombokAnnotations);
         }
     }
@@ -46,5 +46,28 @@ public class PsiClassUtils {
         for (Predicate<PsiMethod> methodPredicate : methodPredicates) {
             PsiMethodUtils.deleteMethods(classes, methodPredicate);
         }
+    }
+    public static void deleteConstructors(List<PsiClass> classes, List<LombokAnnotation> annotations) {
+        boolean noArgsConstructorPresent = isNoArgsConstructorPresent(annotations);
+        for (PsiClass aClass : classes) {
+            PsiMethod[] constructors = aClass.getConstructors();
+            if (noArgsConstructorPresent) {
+                for (PsiMethod constructor : constructors) {
+                    if (!constructor.hasParameters()) {
+                        PsiMethodUtils.deleteConstructor(constructor);
+                    }
+                }
+            }
+            int fieldsCount = aClass.getFields().length;
+            for (PsiMethod constructor : constructors) {
+                int paramsCount = constructor.getParameterList().getParameters().length;
+                if (fieldsCount == paramsCount) {
+                    PsiMethodUtils.deleteConstructor(constructor);
+                }
+            }
+        }
+    }
+    private static boolean isNoArgsConstructorPresent(List<LombokAnnotation> annotations) {
+        return annotations.stream().anyMatch(annotation -> annotation.toString().equals("NoArgsConstructor"));
     }
 }

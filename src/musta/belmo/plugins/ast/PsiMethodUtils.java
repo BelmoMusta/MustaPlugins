@@ -101,4 +101,10 @@ public final class PsiMethodUtils {
             safeDelete.doRefactoring(new UsageInfo[]{});
         }
     }
+
+    public static void deleteConstructor(PsiMethod method) {
+        JavaRefactoringFactory javaRefactoringFactory = JavaRefactoringFactory.getInstance(method.getProject());
+        SafeDeleteRefactoring safeDelete = javaRefactoringFactory.createSafeDelete(new PsiElement[]{method});
+        safeDelete.doRefactoring(new UsageInfo[]{});
+    }
 }

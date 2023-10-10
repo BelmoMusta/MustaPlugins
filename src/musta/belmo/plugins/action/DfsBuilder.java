@@ -10,6 +10,7 @@ public final class DfsBuilder<T> {
     private T root;
     private Predicate<T> nodePredicate;
     private Predicate<T> leafPredicate;
+    private Predicate<T> retainFilter;
     private Function<T, List<T>> directChildrenGetter;
     private boolean includeRoot;
     public DfsBuilder<T> root(T root) {
@@ -32,10 +33,14 @@ public final class DfsBuilder<T> {
         this.includeRoot = includeRoot;
         return this;
     }
+    public DfsBuilder<T> retainFilter(Predicate<T> retainFilter) {
+        this.retainFilter = retainFilter;
+        return this;
+    }
 
     public List<T> toList() {
         List<T> elements = new ArrayList<>();
-        if (includeRoot && !leafPredicate.test(root)){
+        if (includeRoot && !leafPredicate.test(root)) {
             elements.add(root);
         }
         Stack<T> stack = new Stack<>();
@@ -49,6 +54,9 @@ public final class DfsBuilder<T> {
                     stack.push(f);
                 }
             }
+        }
+        if (retainFilter != null) {
+            return elements.stream().filter(retainFilter).toList();
         }
         return elements;
     }
