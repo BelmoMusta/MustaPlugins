@@ -56,4 +56,17 @@ public class PsiUtils {
             addImport(psiJavaFile, lombokAnnotation.getImportName());
         }
     }
+    /**
+     * uncapitalize the inout String
+     *
+     * @param input @link String}
+     * @return String
+     */
+    public static String capitalize(String input) {
+        String output = input;
+        if (input != null && !input.isEmpty()) {
+            output = Character.toUpperCase(input.charAt(0)) + input.substring(1);
+        }
+        return output;
+    }
 }

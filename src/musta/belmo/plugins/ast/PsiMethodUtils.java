@@ -27,7 +27,7 @@ public final class PsiMethodUtils {
     }
     public static boolean isAssociatedWithField(PsiMethod method, PsiField psiField) {
         String methodName = method.getName();
-        String capitalizedFieldName = CodeUtils.capitalize(psiField.getName());
+        String capitalizedFieldName = PsiUtils.capitalize(psiField.getName());
         int subStringIndex = 0;
         if (isASetter(method) || isAGetter(method)) {
             subStringIndex = 3;

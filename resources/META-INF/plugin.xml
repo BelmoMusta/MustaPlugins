@@ -2,7 +2,7 @@
     <id>musta.belmo.plugins.lombokify</id>
     <name>Lombokify</name>
     <version>1.0</version>
-    <vendor email="belmokhtar.91@gmail.com" url="https://github.com/BelmoMusta">MustaBelmo</vendor>
+    <vendor email="belmokhtar.91@gmail.com" url="https://github.com/BelmoMusta">mustabelmo</vendor>
 
     <description><![CDATA[
   This plugin helps to apply lombok annotation on classes automatically.
