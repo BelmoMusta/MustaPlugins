@@ -5,6 +5,7 @@ import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.CommonDataKeys;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.command.CommandProcessor;
+import com.intellij.openapi.command.UndoConfirmationPolicy;
 import com.intellij.openapi.project.Project;
 import com.intellij.pom.Navigatable;
 import com.intellij.psi.PsiElement;
@@ -46,15 +47,17 @@ public abstract class AbstractAction extends AnAction {
     }
     private void applyAction(@NotNull AnActionEvent event, List<PsiElement> psiJavaFiles) {
         transformer = getTransformer();
-        try {
-            CommandProcessor.getInstance().executeCommand(getEventProject(event),
-                    () -> ApplicationManager.getApplication().runWriteAction(() -> {
-                        for (PsiElement psiJavaFile : psiJavaFiles) {
-                            transformer.transformPsi(psiJavaFile);
-                        }
-                    }), transformer.getActionName(), null);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+        if(transformer.isApplied()) {
+            try {
+                CommandProcessor.getInstance().executeCommand(getEventProject(event),
+                        () -> ApplicationManager.getApplication().runWriteAction(() -> {
+                            for (PsiElement psiJavaFile : psiJavaFiles) {
+                                transformer.transformPsi(psiJavaFile);
+                            }
+                        }), transformer.getActionName(), null, UndoConfirmationPolicy.REQUEST_CONFIRMATION);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
         }
     }
     protected abstract Transformer getTransformer();

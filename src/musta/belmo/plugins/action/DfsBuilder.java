@@ -35,7 +35,7 @@ public final class DfsBuilder<T> {
 
     public List<T> toList() {
         List<T> elements = new ArrayList<>();
-        if (includeRoot){
+        if (includeRoot && !leafPredicate.test(root)){
             elements.add(root);
         }
         Stack<T> stack = new Stack<>();
