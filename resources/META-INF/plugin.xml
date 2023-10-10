@@ -1,0 +1,37 @@
+<idea-plugin>
+    <id>musta.belmo.plugins.restroute</id>
+    <name>Rest route creator</name>
+    <version>1.0</version>
+    <vendor email="belmokhtar.91@gmail.com" url="https://github.com/BelmoMusta">mustabelmo</vendor>
+
+    <description><![CDATA[
+  This plugins will help generate REST controller methods from URI signature.
+
+                    Developed with ♥ by mustabelmo
+]]></description>
+
+    <change-notes><![CDATA[
+     First version
+    ]]>
+    </change-notes>
+
+    <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/build_number_ranges.html for description -->
+    <idea-version since-build="173.0"/>
+
+    <depends>com.intellij.modules.java</depends>
+    <extensions defaultExtensionNs="com.intellij">
+        <completion.contributor
+                language="JAVA"
+                implementationClass="musta.belmo.plugins.ast.RestWsCompletionContributor"/>
+    </extensions>
+
+    <actions>
+        <action id="musta.belmo.plugins.action.RestWsCreatorAction"
+                class="musta.belmo.plugins.action.RestWsCreatorAction" text="Rest Ws"
+                description="create ws route">
+            <add-to-group group-id="EditorPopupMenu" anchor="first"/>
+        </action>
+
+    </actions>
+
+</idea-plugin>

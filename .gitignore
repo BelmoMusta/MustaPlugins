@@ -1,0 +1,8 @@
+frames
+*.iml 
+.idea 
+target 
+output
+logs.txt
+out/
+/logs/*
