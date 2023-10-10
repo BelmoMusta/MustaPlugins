@@ -1,0 +1,47 @@
+<idea-plugin>
+    <id>musta.belmo.plugins.lombokify</id>
+    <name>Lombokify</name>
+    <version>1.0</version>
+    <vendor email="belmokhtar.91@gmail.com" url="https://github.com/BelmoMusta">mustabelmo</vendor>
+
+    <description><![CDATA[
+  This plugin helps to apply lombok annotation on classes automatically.
+
+                    Developed with ♥ by mustabelmo
+]]></description>
+
+    <change-notes><![CDATA[
+     First version
+    ]]>
+    </change-notes>
+
+    <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/build_number_ranges.html for description -->
+    <idea-version since-build="173.0"/>
+
+    <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/plugin_compatibility.html
+         on how to target different products -->
+    <!-- uncomment to enable plugin in all products
+    <depends>com.intellij.modules.lang</depends>
+    -->
+
+    <extensions defaultExtensionNs="com.intellij">
+        <!-- Add your extensions here -->
+    </extensions>
+
+    <actions>
+        <group id="musta.belmo.plugins.action.CustomDefaultActionGroup"
+               class="musta.belmo.plugins.action.CustomDefaultActionGroup"
+               text="Lombokify" description="Lombokify">
+
+            <add-to-group group-id="EditorPopupMenu" anchor="first"/>
+            <add-to-group group-id="ToolsMenu" anchor="first"/>
+            <add-to-group group-id="ProjectViewPopupMenu" anchor="first"/>
+            <!-- Add your actions here -->
+            <action id="musta.belmo.plugins.action.LombokifyAction"
+                    class="musta.belmo.plugins.action.LombokifyAction" text="Lombokify"
+                    description="Turn into lombok class">
+            </action>
+        </group>
+    </actions>
+
+</idea-plugin>
